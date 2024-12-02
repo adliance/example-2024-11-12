@@ -1,4 +1,4 @@
-﻿@model Example.Web.ViewModels.Home.IndexViewModel
+@model Example.Web.ViewModels.Home.IndexViewModel
 
 <div class="text-center">
     <h1 class="display-4">Please register</h1>
@@ -11,7 +11,19 @@
     </div>
 }
 
+@if (Model.ShowErrorMessage)
+{
+    <div class="alert alert-danger mt-5 mb-3" role="alert">
+        Registration failed. Your email address is already in use.
+    </div>
+}
+
 <form method="post">
+    <div class="form-group">
+        <label asp-for="EmailAddress">Your email address:</label>
+        <input asp-for="EmailAddress" class="form-control" placeholder="eg. steve.jobs@mail.com">
+        <span asp-validation-for="EmailAddress"></span>
+    </div>
     <div class="form-group">
         <label asp-for="FirstName">Your first name:</label>
         <input asp-for="FirstName" class="form-control" placeholder="eg. Steve">
