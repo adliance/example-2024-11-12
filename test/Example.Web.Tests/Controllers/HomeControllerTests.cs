@@ -1,8 +1,5 @@
 using System.Net;
-using System.Net.Http.Json;
-using Example.Web.Controllers;
 using Example.Web.Models.Database;
-using Example.Web.ViewModels.Home;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -38,7 +35,7 @@ public class HomeControllerTests : IClassFixture<WebApplicationFactory<Program>>
         using var httpClient = _factory.CreateClient();
         var response = await httpClient.PostAsync("/", new FormUrlEncodedContent(new KeyValuePair<string, string>[]
         {
-            new("FirstName", "Some first name"), new("LastName", "Some last name")
+            new("FirstName", "Some first name"), new("LastName", "Some last name"), new("EmailAddress", "Some email")
         }));
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
@@ -47,5 +44,23 @@ public class HomeControllerTests : IClassFixture<WebApplicationFactory<Program>>
         var registration = await _db.Registrations.SingleAsync();
         Assert.Equal("Some first name", registration.FirstName);
         Assert.Equal("Some last name", registration.LastName);
+    }
+
+    [Fact]
+    public async Task Post_Will_Not_Store_Registration_If_Email_Already_Used()
+    {
+        using var httpClient = _factory.CreateClient();
+        var response = await httpClient.PostAsync("/", new FormUrlEncodedContent(new KeyValuePair<string, string>[]
+        {
+            new("FirstName", "Some first name"), new("LastName", "Some last name"), new("EmailAddress", "Some email")
+        }));
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var responseError = await httpClient.PostAsync("/", new FormUrlEncodedContent(new KeyValuePair<string, string>[]
+        {
+            new("FirstName", "Some first name2"), new("LastName", "Some last name2"), new("EmailAddress", "Some email")
+        }));
+
+        Assert.Single(await _db.Registrations.ToListAsync());
     }
 }
